@@ -44,15 +44,15 @@ The scripts included have the following prerequisites making extensive use of:
 
 This script performs the scanning strategy simulations to generate the pointing data.
 
-1. [Gain Mismatch TOD](./scripts/tbc.py)
+2. [Gain Mismatch TOD](./scripts/tbc.py)
 
 This script performs the TOD simulations of the Gain Mismatch systematic.
 
-2. [Beam Squint TOD](./scripts/tbc.py)
+3. [Beam Squint TOD](./scripts/tbc.py)
 
 This script performs the TOD simulations of the Beam Squint systematic.
 
-3. [Foreground Removal](./scripts/tbc.py)
+4. [Foreground Removal](./scripts/tbc.py)
 
 This script performs uses  TOD simulations of the Gain Mismatch systematic.
 
