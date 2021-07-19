@@ -40,7 +40,7 @@ The scripts included have the following prerequisites making extensive use of:
 
 ### Scripts
 
-1. [Scanning Strategy](./scripts/tbc.py)
+1. [Scanning Strategy](Spin-Based_Map-Making_IM/ScanDataGeneration/ScanStrategyGen.py)
 
 This script performs the scanning strategy simulations to generate the pointing data.
 
