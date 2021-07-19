@@ -24,7 +24,7 @@ This is the code repository for the paper Spin-based removal of instrumental sys
 
 We make use of the "fast" simulations of the <a href="http://intensitymapping.physics.ox.ac.uk/CRIME.html" target_="blanck">CRIME</a> software.
 
-The simulated input data is provided at <a href="http://intensitymapping.physics.ox.ac.uk/Simulations/fast1/" target_="blanck">here</a>.
+The simulated input data is provided by them <a href="http://intensitymapping.physics.ox.ac.uk/Simulations/fast1/" target_="blanck">here</a>.
 
 
 ### Requirements
