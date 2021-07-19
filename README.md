@@ -1,4 +1,4 @@
-# Intensity-Mapping
+# Spin-Based_Map-Making_IM
 
 > Author: Nialh McCallum <br/> 
 > Year: 2021 <br/>
