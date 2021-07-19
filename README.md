@@ -54,7 +54,16 @@ This script performs the TOD simulations of the Beam Squint systematic.
 
 4. [Foreground Removal](./scripts/tbc.py)
 
-This script performs uses  TOD simulations of the Gain Mismatch systematic.
+This script performs foreground removal on the output maps from the TOD simulations.
+
+5. [Derivative Fields](./scripts/tbc.py)
+
+This script generates plots of the derivative fields as a function of frequency.
+
+5. [Input Fields](./scripts/tbc.py)
+
+This script generates plots of the input fields as a function of frequency.
+
 
 ### Acknowledgements
 
