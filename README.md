@@ -15,10 +15,10 @@ This is the code repository for the paper Spin-based removal of instrumental sys
 ## Contents
 
 1. [Data](#Data)
-1. [Requirements](#Requirements)
-1. [Scripts](#Scripts)
-1. [Acknowledgements](#Acknowledgements)
-1. [License](#License)
+2. [Requirements](#Requirements)
+3. [Scripts](#Scripts)
+4. [Acknowledgements](#Acknowledgements)
+5. [License](#License)
 
 ### Data
 
