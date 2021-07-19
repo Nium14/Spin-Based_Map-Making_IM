@@ -1,4 +1,4 @@
-# Spin-Based_Map-Making_IM
+# Spin-based removal of instrumental systematics in 21cm intensity mapping surveys
 
 > Author: Nialh McCallum <br/> 
 > Year: 2021 <br/>
