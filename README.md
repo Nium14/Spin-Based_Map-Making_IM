@@ -54,7 +54,7 @@ This script performs uses  TOD simulations of the Gain Mismatch systematic.
 
 ### Acknowledgements
 
-If you use any of this material in your research, please cite the <a href="http://dx.doi.org/TBC" target_="blanck">companion paper</a>.
+If you use any of this material in your research, please cite the <a href="http://TBC" target_="blanck">companion paper</a>.
 
 
 ### License
