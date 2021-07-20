@@ -44,23 +44,27 @@ The scripts included have the following prerequisites making extensive use of:
 
 This script performs the scanning strategy simulations to generate the pointing data.
 
-2. [Gain Mismatch TOD](./scripts/tbc.py)
+2. [Gain Mismatch TOD](./TODSimulations/GainMismatchSimulation.py)
 
 This script performs the TOD simulations of the Gain Mismatch systematic.
 
-3. [Beam Squint TOD](./scripts/tbc.py)
+3. [Beam Squint TOD](./TODSimulations/BeamSquintSimulation.py)
 
 This script performs the TOD simulations of the Beam Squint systematic.
 
-4. [Foreground Removal](./scripts/tbc.py)
+4. [Foreground Removal](./ForegroundCleaning/GainFGCleaning.py)
 
-This script performs foreground removal on the output maps from the TOD simulations.
+This script performs foreground removal on the output maps from the Gain Inluding TOD simulations.
 
-5. [Derivative Fields](./scripts/tbc.py)
+5. [Foreground Removal](./ForegroundCleaning/BeamSquintFGCleaning.py)
+
+This script performs foreground removal on the output maps from the Beam Squint Inluding TOD simulations.
+
+6. [Derivative Fields](./scripts/tbc.py)
 
 This script generates plots of the derivative fields as a function of frequency.
 
-5. [Input Fields](./scripts/tbc.py)
+7. [Input Fields](./scripts/tbc.py)
 
 This script generates plots of the input fields as a function of frequency.
 
