@@ -64,7 +64,7 @@ This script performs foreground removal on the output maps from the Beam Squint 
 
 This script generates plots of the derivative fields as a function of frequency.
 
-7. [Input Fields](./InputandDerivativePlots/InputandDerivativePlots.py)
+7. [Input Fields](./InputandDerivativePlots/PlotInputSignals.py)
 
 This script generates plots of the input fields as a function of frequency.
 
