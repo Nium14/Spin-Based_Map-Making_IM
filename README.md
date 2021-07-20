@@ -35,7 +35,6 @@ The scripts included have the following prerequisites making extensive use of:
 * <a href="https://www.python.org/" target_="blank">Python</a> (required >=3.5)
 * <a href="https://matplotlib.org/" target_="blank">Matplotlib</a> (recommended >=3.1.1)
 * <a href="http://www.numpy.org/" target_="blank">NumPy</a> (recommended >=1.16.4)
-* <a href="https://www.scipy.org/" target_="blank">SciPy</a> (recommended >=1.3.0)
 * <a href="https://github.com/healpy/" target_="blank">healpy</a> (recommended >=1.12.9)
 
 ### Scripts
