@@ -335,7 +335,6 @@ ax.set(xlim=[15,200],xlabel="$\\ell$",ylabel="$\\ell(\\ell+1)C_{\\ell}/(2\\pi)$ 
 
 
 #K Space
-# we are working full-sky, so we pick all available lines-of-sight
 map_input = 1.*h1cosm
 mask[np.isnan(mask)]=0.
 map_input*=(mask/mask)
