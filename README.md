@@ -53,11 +53,11 @@ This script performs the TOD simulations of the Beam Squint systematic.
 
 4. [Foreground Removal](./ForegroundCleaning/GainFGCleaning.py)
 
-This script performs foreground removal on the output maps from the Gain Inluding TOD simulations.
+This script performs foreground removal on the output maps from the Gain Including TOD simulations.
 
 5. [Foreground Removal](./ForegroundCleaning/BeamSquintFGCleaning.py)
 
-This script performs foreground removal on the output maps from the Beam Squint Inluding TOD simulations.
+This script performs foreground removal on the output maps from the Beam Squint Including TOD simulations.
 
 6. [Derivative Fields](./InputandDerivativePlots/derivativefieldsvsfreq.py)
 
