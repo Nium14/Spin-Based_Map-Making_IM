@@ -60,11 +60,11 @@ This script performs foreground removal on the output maps from the Gain Inludin
 
 This script performs foreground removal on the output maps from the Beam Squint Inluding TOD simulations.
 
-6. [Derivative Fields](./scripts/tbc.py)
+6. [Derivative Fields](./InputandDerivativePlots/derivativefieldsvsfreq.py)
 
 This script generates plots of the derivative fields as a function of frequency.
 
-7. [Input Fields](./scripts/tbc.py)
+7. [Input Fields](./InputandDerivativePlots/InputandDerivativePlots.py)
 
 This script generates plots of the input fields as a function of frequency.
 
