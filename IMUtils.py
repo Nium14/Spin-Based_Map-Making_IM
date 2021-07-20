@@ -8,6 +8,8 @@ Created on Mon Jul 19 14:38:02 2021
 import healpy as hp
 
 
+
+#####BEAM SQUINT#####
 def get_derivativeoffield(A,lmax):
     '''
     Get the derivative of an input field A.
@@ -37,6 +39,7 @@ def get_derivativeoffield(A,lmax):
 
 
 
+#####SCANNING STRATEGIES #####
 import ephem
 import numpy as np
 from functools import partial
@@ -208,3 +211,244 @@ def generate_scan(elevation,azend,azstart,pb,surveytime,fsamp,az_freq,delta_az):
     #Convert from pyephem to healpy dec convention
     DEC = np.pi/2. - DEC
     return RA,DEC,AZ,PSI
+
+
+
+
+
+#####MAP-MAKING#####
+
+#Define a function to map make simple bin style for spin-k signals
+def mapmake_simplebin_spink(maps,pixcond,tod,pixel_index,psi,NSIDE,spins=np.array([0]),mask=None):
+    '''
+    Simple Binned Map-making function for arbitrary spin fields.
+
+    Parameters
+    ----------
+    maps : Numpy array of Healpix maps
+        The signals will be output here -> spin-0 needs one map, other spins need 2 maps each
+    pixcond : Numpy array - Healpix Map
+        Single map to which the condition of the map-making matrix for each pixel is returned
+    tod : numpy array
+        Input time ordered data -> single detector, summed, pair etc. (Needs sufficient psi coverage such that matrix is not singular).
+    pixel_index : Numpy array - Healpix Map
+        Map of the pixel indices.
+    psi : numpy array
+        Crossing angles of the time ordered data.
+    NSIDE : Integer
+        NSIDE of the maps.
+    spins : Numpy array, optional
+        The spin field to solve for e.g. spins=np.array([0,1,3]) would solve for fields of spin 0, 1, and 3. The default is np.array([0]).
+    mask : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    maps : Numpy array of Healpix maps
+        Array of maps in ascending spin order (spin-0 just one row) (spin k!=0 has Z_k^Q row followed by Z_k^U row).
+    pixcond : Numpy array - Healpix Map
+        Array of condition of map-making matrix in each pixel.
+    '''
+    
+    #Calculate hitmap
+    hitmap=np.zeros(hp.nside2npix(NSIDE))
+    np.add.at(hitmap,pixel_index.astype(int),1)
+    if mask!=None:
+        hitmap*=mask
+        
+    #if spin-0 included as this only needs one row/column in the matrix
+    if len(np.argwhere(spins==0))>0:
+        cos_sin_matrix = np.zeros((hp.nside2npix(NSIDE),len(spins)*2-1,len(spins)*2-1))
+        data_vector = np.zeros((len(spins)*2 -1,hp.nside2npix(NSIDE)))
+        spin_temp = np.sort(np.concatenate((spins[spins>0],spins[spins>0])))
+
+        #Data in first row of vector is just averaged tod - no psi dependence
+        np.add.at(data_vector[0], pixel_index.astype(int), tod)
+        data_vector[0] /= hitmap
+        #If other spins included add cos and sin rows in so
+        if len(np.argwhere(spins!=0))>0:
+            for i in np.arange(1,len(spin_temp)+1,2):
+                for j in np.arange(1,len(spin_temp)+1,2):
+                    np.add.at(cos_sin_matrix.T[i,j,:], pixel_index.astype(int), np.cos(spin_temp[j]*psi)*np.cos(spin_temp[i]*psi))
+                    np.add.at(cos_sin_matrix.T[i+1,j,:], pixel_index.astype(int), np.cos(spin_temp[j]*psi)*np.sin(spin_temp[i]*psi))
+                    
+                    np.add.at(cos_sin_matrix.T[i+1,j+1,:], pixel_index.astype(int), np.sin(spin_temp[j]*psi)*np.sin(spin_temp[i]*psi))
+                    np.add.at(cos_sin_matrix.T[i,j+1,:], pixel_index.astype(int), np.sin(spin_temp[j]*psi)*np.cos(spin_temp[i]*psi))
+                
+                np.add.at(cos_sin_matrix.T[i,0,:], pixel_index.astype(int), np.cos(spin_temp[i]*psi))
+                np.add.at(cos_sin_matrix.T[0,i,:], pixel_index.astype(int), np.cos(spin_temp[i]*psi))
+                np.add.at(cos_sin_matrix.T[i+1,0,:], pixel_index.astype(int), np.sin(spin_temp[i]*psi))
+                np.add.at(cos_sin_matrix.T[0,i+1,:], pixel_index.astype(int), np.sin(spin_temp[i]*psi))
+                
+                np.add.at(data_vector[i], pixel_index.astype(int), tod*np.cos(spin_temp[i]*psi))
+                np.add.at(data_vector[i+1], pixel_index.astype(int), tod*np.sin(spin_temp[i]*psi))
+        
+            cos_sin_matrix=cos_sin_matrix.T
+            cos_sin_matrix/=hitmap
+            cos_sin_matrix=cos_sin_matrix.T
+            
+            data_vector[1:]/=hitmap
+        cos_sin_matrix.T[0,0,:]=1.
+    #If not zero then the spins all have cos and sin rows in matrix
+    else:
+        cos_sin_matrix = np.zeros((hp.nside2npix(NSIDE),len(spins)*2,len(spins)*2))
+        data_vector = np.zeros((len(spins)*2,hp.nside2npix(NSIDE)))
+        spin_temp = np.sort(np.concatenate((spins[spins>0],spins[spins>0])))
+
+        for i in np.arange(0,len(spin_temp),2):
+            for j in np.arange(0,len(spin_temp),2):
+                np.add.at(cos_sin_matrix.T[i,j,:], pixel_index.astype(int), np.cos(spin_temp[j]*psi)*np.cos(spin_temp[i]*psi))
+                np.add.at(cos_sin_matrix.T[i+1,j,:], pixel_index.astype(int), np.cos(spin_temp[j]*psi)*np.sin(spin_temp[i]*psi))
+                
+                np.add.at(cos_sin_matrix.T[i+1,j+1,:], pixel_index.astype(int), np.sin(spin_temp[j]*psi)*np.sin(spin_temp[i]*psi))
+                np.add.at(cos_sin_matrix.T[i,j+1,:], pixel_index.astype(int), np.sin(spin_temp[j]*psi)*np.cos(spin_temp[i]*psi))                
+            
+            np.add.at(data_vector[i], pixel_index.astype(int), tod*np.cos(spin_temp[i]*psi))
+            np.add.at(data_vector[i+1], pixel_index.astype(int), tod*np.sin(spin_temp[i]*psi))
+        cos_sin_matrix=cos_sin_matrix.T
+        cos_sin_matrix/=hitmap
+        cos_sin_matrix=cos_sin_matrix.T
+        data_vector/=hitmap
+    
+    #Loop over the pixels and map-make
+    #Probably possible to speed up somehow by removing loop here??
+    pixtemp=np.arange(0,hp.nside2npix(NSIDE))[hitmap==0]
+    maps[:,pixtemp] = np.nan
+    pixtemp=np.arange(0,hp.nside2npix(NSIDE))[hitmap!=0]
+    for i in pixtemp:
+        A = np.matrix(cos_sin_matrix[i])
+        D = np.matrix([[j] for j in data_vector.T[i].tolist()])
+        #Get the conditioning of the matrix
+        pixcond[i] = np.linalg.cond(A)
+        
+        try:
+            #Perform the map-making
+            maps[:,i] = np.squeeze(np.asarray(A.I * D))
+        except np.linalg.LinAlgError as err:
+            if 'Singular matrix' in str(err):
+                maps[:,i] = np.nan
+                print ('Singular Matrix at pixel '+np.str(i)+' setting to nan.')
+            else:
+                raise
+            
+    
+    return maps,pixcond
+
+
+
+
+#Define a function to map make simple bin style for spin-k signals
+def mapmake_h_kbin_spink(maps,pixcond,tod,pixel_index,psi,NSIDE,spins=np.array([0]),mask=None):
+    """
+    Simple Binned Map-making function for arbitrary spin fields using h_k approach
+    
+    Inputs:
+    maps is an array of healpy maps to which the signals will be output -> spin-0 needs one map, other spins need 2 maps each
+    pixcond is a single map to which the condition of the map-making matrix for each pixel is returned
+    tod is the input time ordered data -> single detector, summed, pair etc. (Needs sufficient psi coverage such that matrix is not singular)
+    pixel_index is a map of the pixel indices
+    hitmap is the map of the hits in a pixel
+    NSIDE is the nside of the maps
+    spins is an array of the spin field to solve for e.g. spins=np.array([0,1,3]) would solve for fields of spin 0, 1, and 3
+    
+    returns
+    -array of maps in ascending spin order (spin-0 just one row) (spin k!=0 has spin -k field (Z_k^Q-iZ_k^U) row followed by spin +k field (Z_k^Q+iZ_k^U) row)
+    -array of condition of map-making matrix in each pixel
+    """
+    
+    #Calculate hitmap
+    hitmap=np.zeros(hp.nside2npix(NSIDE))
+    np.add.at(hitmap,pixel_index.astype(int),1)
+    if mask!=None:
+        hitmap*=mask
+        
+    #if spin-0 included as this only needs one row/column in the matrix
+    if len(np.argwhere(spins==0))>0:
+        h_n_matrix = np.zeros((hp.nside2npix(NSIDE),len(spins)*2-1,len(spins)*2-1))*0J
+        data_vector = np.zeros((len(spins)*2 -1,hp.nside2npix(NSIDE)))*0J
+        spin_temp = np.sort(np.concatenate((spins,spins[spins>0])))
+        spin_temp[::2]*=-1
+    else:
+        h_n_matrix = np.zeros((hp.nside2npix(NSIDE),len(spins)*2,len(spins)*2))*0J
+        data_vector = np.zeros((len(spins)*2,hp.nside2npix(NSIDE)))*0J
+        spin_temp = np.sort(np.concatenate((spins[spins>0],spins[spins>0])))
+        spin_temp[1::2]*=-1
+
+    for i in np.arange(0,len(spin_temp),1):
+        for j in np.arange(0,len(spin_temp),1):
+            np.add.at(h_n_matrix.T[i,j,:], pixel_index.astype(int), np.cos((spin_temp[i]+spin_temp[j])*psi)+1j*np.sin((spin_temp[i]+spin_temp[j])*psi))
+        
+        if spin_temp[i]==0:
+            np.add.at(data_vector[i], pixel_index.astype(int), tod*(np.cos(spin_temp[i]*psi)+1j*np.sin(spin_temp[i]*psi)))
+        else:
+            np.add.at(data_vector[i], pixel_index.astype(int), 0.5*tod*(np.cos(spin_temp[i]*psi)+1j*np.sin(spin_temp[i]*psi)))
+
+    h_n_matrix=h_n_matrix.T
+    h_n_matrix/=hitmap
+    h_n_matrix=h_n_matrix.T
+        
+    data_vector[0:]/=hitmap
+    if len(np.argwhere(spins==0))>0:
+        h_n_matrix.T[0,0,:]=1.
+        h_n_matrix.T[1:,0,:]*=0.5
+        h_n_matrix.T[0,1:,:]*=0.5
+        if len(np.argwhere(spins!=0))>0:
+            h_n_matrix.T[1:,1:,:]*=0.25
+    else:
+        h_n_matrix.T[0:,0:,:]*=0.25
+    
+    
+    #Loop over the pixels and map-make
+    #Probably possible to speed up somehow by removing loop here??
+    pixtemp=np.arange(0,hp.nside2npix(NSIDE))[hitmap==0]
+    maps[:,pixtemp] = np.nan
+    pixtemp=np.arange(0,hp.nside2npix(NSIDE))[hitmap!=0]
+    
+    for i in pixtemp:
+        A = np.matrix(h_n_matrix[i])
+        D = np.matrix([[j] for j in data_vector.T[i].tolist()])
+        #Get the conditioning of the matrix
+        pixcond[i] = np.linalg.cond(A)
+        
+        try:
+            #Perform the map-making
+            maps[:,i] = np.squeeze(np.asarray(A.I * D))
+        except np.linalg.LinAlgError as err:
+            if 'Singular matrix' in str(err):
+                maps[:,i] = np.nan
+                print ('Singular Matrix at pixel '+np.str(i)+' setting to nan.')
+            else:
+                raise
+    return maps,pixcond
+
+
+
+
+
+
+#####FG Removal#####
+import subprocess
+def ApodizeMask(mask,apodisation_scale):
+    hp.write_map('Mask.fits',mask)
+    
+    mask_file = "mask_file=Mask.fits\n"
+    hole_min_size = "hole_min_size=0\n"
+    distance_file= "distance_file=Distance.fits"
+    
+    File_Object = open(r"./apodizefile.txt","w+")
+    File_Object.writelines([mask_file,hole_min_size,distance_file])
+    File_Object.close()
+        
+    command = '/mirror/scratch/mccallum/Healpix_3.60/bin/process_mask ' + './apodizefile.txt'
+    exit_process = subprocess.call(command, shell=True)
+    dist = hp.read_map('Distance.fits')
+    
+    aposcale=apodisation_scale*np.mean(dist[dist>0])
+    mask_apo = 1.*dist
+    mask_apo[dist>aposcale]=1.
+    mask_apo[dist<=aposcale]/=aposcale
+
+    mask*=mask_apo
+    mask[np.isnan(mask)]=0.
+    
+    return mask

@@ -368,7 +368,7 @@ plt.rc('font', family='serif')
 plt.rcParams.update({'font.size': 16})
 
 k, P = g4i.plot_nuPk(map_input,indexes_los,freqs)
-plt.semilogy(k, P,'-',c='#1f77b4',label='Cosmological Signal')
+plt.semilogy(k, P,'-',c='k',label='Cosmological Signal')
 
 k, P = g4i.plot_nuPk(residuals_nosyst02,indexes_los,freqs)
 plt.semilogy(k, P,'o',c='r',label='Spin-0 and 2 map-making, No Systematic')
