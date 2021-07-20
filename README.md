@@ -70,7 +70,7 @@ This script generates plots of the input fields as a function of frequency.
 
 ### Acknowledgements
 
-If you use any of this material in your research, please cite the <a href="http://TBC" target_="blanck">companion paper</a>.
+If you use any of this material in your research, please cite the <a href="https://arxiv.org/abs/2107.08058" target_="blanck">companion paper</a>.
 
 
 ### License
