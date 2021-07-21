@@ -67,6 +67,10 @@ This script generates plots of the derivative fields as a function of frequency.
 
 This script generates plots of the input fields as a function of frequency.
 
+8. [Coverage Maps](./ScanDataGeneration/CoverageDifferentElevs.py)
+
+This script generates plots of the hitmaps with the inclusion of different elevations.
+
 
 ### Acknowledgements
 
