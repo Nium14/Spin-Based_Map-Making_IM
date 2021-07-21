@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import healpy as hp
 
 import sys
+#Set path to where gmca4im is installed
 sys.path.insert(1, '/mirror/scratch/mccallum/IntensityMapping/ForegroundCleaning/gmca4im/scripts')
 import gmca4im_lib2 as g4i
-sys.path.append("../")
-import IMUtils
+
 
 
 #Set the frequency channel range and load relevant data
@@ -92,7 +92,7 @@ for i in range(0,len(obs_maps_spin0and1and3mapmake)):
 
 
 #Generate or load the wavelets
-genwavelets=True
+genwavelets=False
 if genwavelets:
     X_wt_spin0and1and3mapmake = g4i.wavelet_transform(obs_maps_spin0and1and3mapmake)
     #X_wt_spin0and1mapmake = g4i.wavelet_transform(obs_maps_spin0and1mapmake)
@@ -104,18 +104,20 @@ if genwavelets:
 else:
     X_wt_spin0and1and3mapmake = np.loadtxt('./WaveletsIspin0and1mapmaking_BeamSquint_rhoLinearCondNumCut1e11.txt')
     X_wt_spin0mapmake = np.loadtxt('./WaveletsIspin0mapmaking_BeamSquint_rhoLinearCondNumCut1e11.txt')
+    #X_wt_spin0and1and3mapmake = np.loadtxt('./WaveletsIspin0and1mapmaking_BeamSquint_rhoRandomCondNumCut1e11.txt')
+    #X_wt_spin0mapmake = np.loadtxt('./WaveletsIspin0mapmaking_BeamSquint_rhoRandomCondNumCut1e11.txt')
 
     X_wt_spin0and1and3nosyst = np.loadtxt('./WaveletsIspin0and1mapmaking_BeamSquint_rho0CondNumCut1e11.txt')
     X_wt_spin0nosyst = np.loadtxt('./WaveletsIspin0mapmaking_BeamSquint_rho0CondNumCut1e11.txt')
 
 
 #Save the wavelets
-savewavelets = True
+savewavelets = False
 if savewavelets:
     np.savetxt('WaveletsIspin0and1mapmaking_BeamSquint_rhoRandomCondNumCut1e11.txt',X_wt_spin0and1and3mapmake)
     np.savetxt('WaveletsIspin0mapmaking_BeamSquint_rhoRandomCondNumCut1e11.txt',X_wt_spin0mapmake)
-    np.savetxt('WaveletsIspin0and1mapmaking_BeamSquint_rho0CondNumCut1e11.txt',X_wt_spin0and1and3nosyst)
-    np.savetxt('WaveletsIspin0mapmaking_BeamSquint_rho0CondNumCut1e11.txt',X_wt_spin0nosyst)
+    #np.savetxt('WaveletsIspin0and1mapmaking_BeamSquint_rho0CondNumCut1e11.txt',X_wt_spin0and1and3nosyst)
+    #np.savetxt('WaveletsIspin0mapmaking_BeamSquint_rho0CondNumCut1e11.txt',X_wt_spin0nosyst)
 
 
 #Perform the GMCA
@@ -311,7 +313,7 @@ plt.rcParams["axes.labelsize"] = 16
 plt.rc('font', family='serif')
 plt.rcParams.update({'font.size': 16})
 ell, y = g4i.plot_cl(map_input)
-plt.semilogy(ell, y,'-',c='#1f77b4',label='Cosmological Signal');
+plt.semilogy(ell, y,'-',c='k',label='Cosmological Signal');
 
 
 ellnosyst, ynosyst = g4i.plot_cl(residuals_spin0and1and3nosyst)
@@ -374,7 +376,7 @@ plt.rc('font', family='serif')
 plt.rcParams.update({'font.size': 16})
 
 k, P = g4i.plot_nuPk(map_input,indexes_los,freqs)
-plt.semilogy(k, P,'-',c='#1f77b4',label='Cosmological Signal')
+plt.semilogy(k, P,'-',c='k',label='Cosmological Signal')
 
 k, P = g4i.plot_nuPk(residuals_nosyst013,indexes_los,freqs)
 plt.semilogy(k, P,'o',c='r',label='Spin-0, 1 and 3 map-making, No Systematic')
@@ -394,226 +396,6 @@ ax.set(xlabel="$k_{\\nu}$ [MHz$^{-1}$]",ylabel="$P$ [mK$^2$ MHz$^2$]");
 
 
 
-#Plot Mask
-plt.figure()
-hp.cartview(mask*(mask/mask),title='Apodized Mask',hold=True,rot=(162.5,3,0),lonra=lonra,latra=latra)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-sys.exit()
-####Plots in other orientation####
-mask = (obs_maps_spin0and1and3mapmake/obs_maps_spin0and1and3mapmake)*(obs_maps_spin0mapmake/obs_maps_spin0mapmake)*(obs_maps_spin0nosyst/obs_maps_spin0nosyst)*(obs_maps_spin0and1and3nosyst/obs_maps_spin0and1and3nosyst)
-mask[np.isnan(mask)]=0.
-mask = mask[0]
-# pick a channel number
-ich = 140
-
-#Map Space
-map_input = 1.*h1cosm[ich]
-mask[np.isnan(mask)]=0.
-map_input*=mask
-map_input[np.isnan(map_input)]=0.
-map_input[map_input!=0] -= np.mean(map_input[map_input!=0])
-
-
-
-Apodize=False
-if Apodize:
-    '''
-    hp.write_map('Mask.fits',mask[0])
-    
-    mask_file = "mask_file=Mask.fits\n"
-    hole_min_size = "hole_min_size=0\n"
-    distance_file= "distance_file=Distance.fits"
-    
-    File_Object = open(r"./apodizefile.txt","w+")
-    File_Object.writelines([mask_file,hole_min_size,distance_file])
-    File_Object.close()
-        
-    command = '/mirror/scratch/mccallum/Healpix_3.60/bin/process_mask ' + './apodizefile.txt'
-    exit_process = subprocess.call(command, shell=True)
-    '''
-    dist = hp.read_map('Distance.fits')
-    
-    aposcale=2.*np.mean(dist[dist>0])
-    mask_apo = 1.*dist
-    mask_apo[dist>aposcale]=1.
-    mask_apo[dist<=aposcale]/=aposcale
-
-    mask*=mask_apo
-    mask[np.isnan(mask)]=0.
-
-
-map_input*=mask
-
-
-residuals_spin0and1and3mapmake = obs_maps_spin0and1and3mapmake[ich]-X_gmca_spin0and1and3mapmake[ich]
-residuals_spin0mapmake = obs_maps_spin0mapmake[ich]-X_gmca_spin0mapmake[ich]
-
-residuals_spin0and1and3nosyst = obs_maps_spin0and1and3nosyst[ich]-X_gmca_spin0and1and3nosyst[ich]
-residuals_spin0nosyst = obs_maps_spin0nosyst[ich]-X_gmca_spin0nosyst[ich]
-
-
-residuals_spin0and1and3mapmake*=mask
-residuals_spin0mapmake*=mask
-residuals_spin0and1and3nosyst*=mask
-residuals_spin0nosyst*=mask
-
-
-lonra=[-22.5,17.5]
-latra=[-6,6]
-
-
-fig, (ax1,ax2,ax3) = plt.subplots(ncols=3)
-plt.axes(ax1)
-input1 = hp.cartview(map_input*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='Input HI')
-plt.axes(ax2)
-output0 = hp.cartview(residuals_spin0mapmake*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='GMCA residuals 0')
-plt.axes(ax3)
-output02 = hp.cartview(residuals_spin0and1and3mapmake*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='GMCA residuals 0 and 1')
-
-fig, (ax1,ax2,ax3) = plt.subplots(ncols=3)
-plt.axes(ax1)
-input1 = hp.cartview(map_input*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='Input HI')
-plt.axes(ax2)
-output0_ns = hp.cartview(residuals_spin0nosyst*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='GMCA residuals 0 No Syst')
-plt.axes(ax3)
-output02_ns = hp.cartview(residuals_spin0and1and3nosyst*(mask/mask),rot=(162.5,3,0),return_projected_map=True,lonra=lonra,latra=latra,hold=True,title='GMCA residuals 0 and 1 No Syst')
-
-
-
-
-input1flip = input1#np.fliplr(input1)
-output0flip = output0#np.fliplr(output0)
-output02flip = output02#np.fliplr(output02)
-output0_nsflip = output0_ns#np.fliplr(output0_ns)
-output02_nsflip = output02_ns#np.fliplr(output02_ns)
-
-
-
-
-left=lonra[1]
-right=lonra[0]
-
-fig = plt.figure(figsize=(20, 6))
-fig.suptitle('Channel = '+np.str(np.round(freqs[ich],2))+'MHz Spin 0 (and 2) Map-Making Lower (Upper)',fontsize=20)
-ax1 = fig.add_subplot(2,3,1)
-plt.axes(ax1)
-plt.title('Input Cosmological Signal')
-im1 = ax1.imshow(input1flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im1, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-ax2 = fig.add_subplot(2,3,2)
-plt.axes(ax2)
-plt.title('GMCA residuals, Num Components = 5, Spin-0 and 1')
-im2 = ax2.imshow(output02flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im2, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-ax3 = fig.add_subplot(2,3,3)
-plt.axes(ax3)
-plt.title('GMCA residuals, Num Components = 5, Spin-0 and 1, No Systematic')
-im3 = ax3.imshow(output02_nsflip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im3, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-
-
-
-ax5 = fig.add_subplot(2,3,5)
-plt.axes(ax5)
-plt.title('GMCA residuals, Num Components = 5, Spin-0')
-im5 = ax5.imshow(output0flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im5, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-ax6 = fig.add_subplot(2,3,6)
-plt.axes(ax6)
-plt.title('GMCA residuals, Num Components = 5, Spin-0, No Systematic')
-im6 = ax6.imshow(output0_nsflip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im6, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-
-
-
-
-
-
-
-###Paper map plots
-plt.rc('font', family='serif')
-plt.rcParams.update({'font.size': 24})
-plt.rcParams["axes.labelsize"] = 24
-
-fig, (ax1) = plt.subplots(ncols=1,nrows=1)
-#fig.suptitle('Channel = '+np.str(np.round(freqs[ich],2))+'MHz Spin 0 (and 2) Map-Making Lower (Upper)',fontsize=20)
-plt.axes(ax1)
-#plt.title('Input Cosmological Signal')
-im1 = ax1.imshow(input1flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none',vmin=-0.1,vmax=0.28)
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-plt.xticks(np.arange(175,135,-5))
-#plt.yticks(np.arange(-2,10,2))
-clb=fig.colorbar(im1, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-
-
-
-plt.rcParams.update({'font.size': 24})
-plt.rcParams["axes.labelsize"] = 24
-fig, (ax1,ax2) = plt.subplots(ncols=2,nrows=1)
-#fig.suptitle('Channel = '+np.str(np.round(freqs[ich],2))+'MHz Spin 0 (and 1) Map-Making Lower (Upper)',fontsize=20)
-plt.axes(ax1)
-#plt.title('GMCA residuals, Num Components = 5, Spin-0 and 1')
-im2 = ax1.imshow(output02flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none',vmin=-0.1,vmax=0.28)
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im2, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-plt.xticks(np.arange(175,135,-5))
-
-plt.axes(ax2)
-#plt.title('GMCA residuals, Num Components = 5, Spin-0')
-im5 = ax2.imshow(output0flip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none')
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im5, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-plt.xticks(np.arange(175,135,-5))
-
-
-fig, (ax1,ax2) = plt.subplots(ncols=2,nrows=1)
-plt.axes(ax1)
-#plt.title('GMCA residuals, Num Components = 5, Spin-0 and 1, No Systematic')
-im3 = ax1.imshow(output02_nsflip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none',vmin=-0.1,vmax=0.28)
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im3, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
-
-plt.axes(ax2)
-#plt.title('GMCA residuals, Num Components = 5, Spin-0, No Systematic')
-im6 = ax2.imshow(output0_nsflip, origin='lower',extent=(160+left,160+right,3+latra[0],3+latra[1]), interpolation = 'none',vmin=-0.1,vmax=0.28)
-plt.xlabel('R.A.')
-plt.ylabel('Dec.')
-clb=fig.colorbar(im6, orientation="horizontal", pad=0.2)
-clb.set_label('mK')
